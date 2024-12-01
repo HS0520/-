@@ -2,6 +2,7 @@ import RPi.GPIO as GPIO
 import tkinter as tk
 import random
 import time
+from PIL import Image, ImageTk
 
 GPIO.setwarnings(False)
 GPIO.setmode(GPIO.BCM)
@@ -50,19 +51,18 @@ class RockPaperScissorsGame:
         self.cpu_label = tk.Label(self.master, text="CPU: 선택 안함", font=("Helvetica", 14), fg="blue")
         self.cpu_label.pack()
 
-        # Canvas에 원형 버튼 생성 / GUI
+        # Canvas 생성 / GUI
         self.canvas = tk.Canvas(self.master, width=400, height=200)
         self.canvas.pack(pady=20)
 
-        # 원형 버튼 / GUI
-        self.scissors_circle = self.canvas.create_oval(50, 50, 150, 150, fill="gray", tags="가위")
-        self.rock_circle = self.canvas.create_oval(170, 50, 270, 150, fill="gray", tags="바위")
-        self.paper_circle = self.canvas.create_oval(290, 50, 390, 150, fill="gray", tags="보")
+        # 이미지 로드 및 Canvas에 추가
+        self.scissors_image = self.load_image("scissors.png", (100, 100))
+        self.rock_image = self.load_image("rock.png", (100, 100))
+        self.paper_image = self.load_image("paper.png", (100, 100))
 
-        # 원형 버튼 텍스트 / GUI
-        self.canvas.create_text(100, 160, text="가위", font=("Helvetica", 12))
-        self.canvas.create_text(220, 160, text="바위", font=("Helvetica", 12))
-        self.canvas.create_text(340, 160, text="보", font=("Helvetica", 12))
+        self.scissors_item = self.canvas.create_image(100, 100, image=self.scissors_image, tags="가위")
+        self.rock_item = self.canvas.create_image(220, 100, image=self.rock_image, tags="바위")
+        self.paper_item = self.canvas.create_image(340, 100, image=self.paper_image, tags="보")
 
         # Canvas 클릭 이벤트 연결 / GUI
         self.canvas.tag_bind("가위", "<Button-1>", lambda event: self.make_choice("가위"))
@@ -100,6 +100,11 @@ class RockPaperScissorsGame:
             time.sleep(0.2)
         self.buzzer.stop()
 
+    def load_image(self, path, size):
+        img = Image.open(path)  # 이미지 파일 열기
+        img = img.resize(size, Image.ANTIALIAS)  # 크기 조정 (안티앨리어싱 처리)
+        return ImageTk.PhotoImage(img)  # PhotoImage 객체 반환
+    
     def update_canvas(self, choice):  # Canvas의 원 색상을 업데이트
         # 초기화: 모든 원을 회색으로 설정
         self.canvas.itemconfig(self.scissors_circle, fill="gray")
